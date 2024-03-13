@@ -158,7 +158,7 @@ def main(W_expression: list[int], v: list[int], n: int) -> None:
     categorification when v = w^{K}_0 u for W^{K} parabolic associated to a Grassmannian and
     u in W^{K}\W."""
     print('First we produce the cluster-tilting object in C_w \n')
-    tilt_alg_gls(W_expression, n, verbose=True)
+    tilt_alg_gls(W_expression, n)
     print(f'Each summand must then be quotiented by a maximal submodule which is a factor of the following module:')
     epsilon(index_to_perm(v, n), n)
 
