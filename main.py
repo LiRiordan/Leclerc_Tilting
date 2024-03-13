@@ -72,8 +72,9 @@ def tilt_alg_gls(expression: list[int], n: int, verbose = False) -> None:
     """We now implement Leclerc's algorithm by taking sequential subwords of the reduced
     expression for w and applying the above process. This gives a tilting object in C_{w}"""
     total = []
+    reversed_expression = expression[::-1]
     for i in range(len(expression)):
-        total.append([reflector(expression[:i+1], n), expression[i]])
+        total.append([reflector(reversed_expression[:i+1], n), reversed_expression[i]])
     if verbose:
         for j in total:
             print(list_to_profile(j[0], j[1]))
