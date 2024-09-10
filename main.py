@@ -50,14 +50,14 @@ def niave_expression(perm: list[int], n: int) -> list[int]:
             pass
         else:
             t += [i for i in range(simple_to_perm(t, 12).index(perm[i-1]) + 1, i)]
-    if simple_to_perm(t, n) == perm:
-        return t
-    else:
-        print('Error. Failed on return of:')
-        return t
+    return t
+
 
 
 def main_2(exp: list[int], n:int) -> list[int]:
+    '''Converts the types of simple expressions used in positroid varieties
+    by Galashin and Lam into a simple expression for positroid varieties
+    in the notation of Leclerc.'''
     a = simple_to_perm(exp, n)
     b = inv(a)
     c = flip(b, n)
