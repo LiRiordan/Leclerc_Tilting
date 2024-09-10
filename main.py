@@ -51,6 +51,11 @@ def niave_expression(perm: list[int], n: int) -> list[int]:
     return t
 
 
+def perm_concat(a: list[int], b: list[int]) -> list[int]:
+    '''Computes ab as a permutation.'''
+    return [a[b[i] - 1] for i in range(len(a))]
+
+
 
 def main_2(exp: list[int], n:int) -> list[int]:
     '''Converts the types of simple expressions used in positroid varieties
@@ -63,14 +68,18 @@ def main_2(exp: list[int], n:int) -> list[int]:
 
 
 ### Commented out example.
-# f = main_2([4,3,2,1,5,4,3,2,7,6,5,4,3,8,7,6,5,4,10,9,8,7,6,5,11,10,9,8,7,6],12)
-# print(f)
-# print(simple_to_perm(f,12))
-# print(len(f))
-# g = main_2([4,3,2,1,4,3,2,7,6,5,4,3,8,6,4,10,9,8,7,6,5,11,10,9,8,7],12)
-# print(g)
-# print(simple_to_perm(g, 12))
-# print(len(g))
+f = main_2([4,3,2,1,5,4,3,2,7,6,5,4,3,8,7,6,5,4,10,9,8,7,6,5,11,10,9,8,7,6],12)
+print(f)
+t = simple_to_perm(f,12)
+print(t)
+print(len(f))
+g = main_2([4,3,2,1,4,3,2,7,6,5,4,3,8,6,4,10,9,8,7,6,5,11,10,9,8,7],12)
+print(g)
+s = simple_to_perm(g, 12)
+print(s)
+print(len(g))
+print(perm_concat(inv(t),s))
+
 
 
 
