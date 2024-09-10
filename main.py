@@ -22,18 +22,16 @@ b = [4,3,2,1,5,4,3,2,7,6,5,4,3,8,7,6,5,4,10,9,8,7,6,5,11,10,9,8,7,6]
 
 
 def long_1(exp: list[int], k: int) -> list[int]:
+    '''Equivalent to multiplying on the left by w^{K}_0.'''
     return exp[:k][::-1] + exp[k:][::-1]
 
 
 def long_2(exp: list[int], k: int) -> list[int]:
+    '''Equivalent to multiplying on the right by w^{K}_0.'''
     run = [i+1 for i in range(len(exp))]
     run = long_1(run, k)
     run_dict = {i + 1: run[i] for i in range(len(run))}
     return [run_dict[i] for i in long_1(exp, k)]
-
-
-def gl_to_lec(exp: list[int], n: int) -> list[int]:
-    return simple_to_perm(exp[::-1], n)[::-1]
 
 
 def inv(exp: list[int]) -> list[int]:
@@ -64,14 +62,15 @@ def main_2(exp: list[int], n:int) -> list[int]:
     return niave_expression(c, 12)
 
 
-f = main_2([4,3,2,1,5,4,3,2,7,6,5,4,3,8,7,6,5,4,10,9,8,7,6,5,11,10,9,8,7,6],12)
-print(f)
-print(simple_to_perm(f,12))
-print(len(f))
-g = main_2([4,3,2,1,4,3,2,7,6,5,4,3,8,6,4,10,9,8,7,6,5,11,10,9,8,7],12)
-print(g)
-print(simple_to_perm(g, 12))
-print(len(g))
+### Commented out example.
+# f = main_2([4,3,2,1,5,4,3,2,7,6,5,4,3,8,7,6,5,4,10,9,8,7,6,5,11,10,9,8,7,6],12)
+# print(f)
+# print(simple_to_perm(f,12))
+# print(len(f))
+# g = main_2([4,3,2,1,4,3,2,7,6,5,4,3,8,6,4,10,9,8,7,6,5,11,10,9,8,7],12)
+# print(g)
+# print(simple_to_perm(g, 12))
+# print(len(g))
 
 
 
