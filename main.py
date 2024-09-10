@@ -1,3 +1,85 @@
+### We include several other functions for dealing with permutations
+
+def simple_to_perm(expression: list[int], n: int) -> list[int]:
+    '''Takes a simple expression in format list[int], and the number n with the
+    permutation of n letters and returns the corresponding permutation giving the bottom row of the
+    permutation in list[int] format.'''
+    out = [i+1 for i in range(n)]
+    for j in expression:
+        out = out[:j-1] + [out[j]] + [out[j-1]] + out[j+1:]
+    return out
+
+
+def flip(perm: list[int], n: int) -> list[int]:
+    '''Equivalent to sending a permutation, perm, to w_0 perm.'''
+    for i in range(len(perm)):
+        perm[i] = n+1 - perm[i]
+    return perm
+
+
+a = [4,3,2,1,4,3,2,7,6,5,4,3,8,6,4,10,9,8,7,6,5,11,10,9,8,7]
+b = [4,3,2,1,5,4,3,2,7,6,5,4,3,8,7,6,5,4,10,9,8,7,6,5,11,10,9,8,7,6]
+
+
+def long_1(exp: list[int], k: int) -> list[int]:
+    return exp[:k][::-1] + exp[k:][::-1]
+
+
+def long_2(exp: list[int], k: int) -> list[int]:
+    run = [i+1 for i in range(len(exp))]
+    run = long_1(run, k)
+    run_dict = {i + 1: run[i] for i in range(len(run))}
+    return [run_dict[i] for i in long_1(exp, k)]
+
+
+def gl_to_lec(exp: list[int], n: int) -> list[int]:
+    return simple_to_perm(exp[::-1], n)[::-1]
+
+
+def inv(exp: list[int]) -> list[int]:
+    inv_dict = {exp[i]: i+1 for i in range(len(exp))}
+    return [inv_dict[j+1] for j in range(len(exp))]
+
+
+def niave_expression(perm: list[int], n: int) -> list[int]:
+    '''Niave algorithm for producing a simple expression for a permutation.'''
+    t = []
+    j = [i+1 for i in range(12)]
+    for i in j[::-1]:
+        if simple_to_perm(t, n)[i-1] == perm[i-1]:
+            pass
+        else:
+            t += [i for i in range(simple_to_perm(t, 12).index(perm[i-1]) + 1, i)]
+    if simple_to_perm(t, n) == perm:
+        return t
+    else:
+        print('Error. Failed on return of:')
+        return t
+
+
+def main_2(exp: list[int], n:int) -> list[int]:
+    a = simple_to_perm(exp, n)
+    b = inv(a)
+    c = flip(b, n)
+    return niave_expression(c, 12)
+
+
+f = main_2([4,3,2,1,5,4,3,2,7,6,5,4,3,8,7,6,5,4,10,9,8,7,6,5,11,10,9,8,7,6],12)
+print(f)
+print(simple_to_perm(f,12))
+print(len(f))
+g = main_2([4,3,2,1,4,3,2,7,6,5,4,3,8,6,4,10,9,8,7,6,5,11,10,9,8,7],12)
+print(g)
+print(simple_to_perm(g, 12))
+print(len(g))
+
+
+
+
+
+
+
+
 def reflector(expression: list[int], n: int) -> list[int]:
     """We follow the algorithm in the Leclerc paper on cluster structures in
     strata of Grassmannians and treat a:list[int] as the indices for a reduced
@@ -152,7 +234,7 @@ def index_to_perm(index: list[int], n: int) -> list[int]:
 
 def main(W_expression: list[int], v: list[int], n: int) -> None:
     """Given a reduced expression for w and a k-index v giving rise to a Grassmannian
-    Richardson variety we implement an alogrithm to produce a tilting module in Leclerc's
+    Richardson variety in Gr(k,n+1) we implement an alogrithm to produce a tilting module in Leclerc's
     C_{w}. This then must be quotiented by the maximal submodule in C_{v}. We construct the module
     whose factors give C_{v}. This speeds up the process of computing tilting objects in Leclerc's
     categorification when v = w^{K}_0 u for W^{K} parabolic associated to a Grassmannian and
@@ -162,11 +244,12 @@ def main(W_expression: list[int], v: list[int], n: int) -> None:
     print(f'Each summand must then be quotiented by a maximal submodule which is a factor of the following module:')
     epsilon(index_to_perm(v, n), n)
 
-W_expression = [2, 1, 2, 6, 5, 6, 4, 5, 6, 3, 2, 4, 1, 3, 5, 2, 4, 6, 3, 5]
-v = [1, 3, 5]
-n = 6
 
-if __name__ == '__main__':
-    main(W_expression, v, n)
+W_expression = [6, 7, 8, 9, 10, 11, 4, 5, 6, 7, 8, 9, 10, 7, 8, 9, 2, 3, 4, 5, 6, 7, 8,
+                1, 2, 3, 4, 5, 6, 7, 4, 5, 6, 5, 1, 2, 3, 4, 1, 3]
+v = [1, 2, 4, 5, 7, 8]
+n = 11
 
+# if __name__ == '__main__':
+#     main(W_expression, v, n)
 
