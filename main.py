@@ -17,21 +17,17 @@ def flip(perm: list[int], n: int) -> list[int]:
     return perm
 
 
-a = [4,3,2,1,4,3,2,7,6,5,4,3,8,6,4,10,9,8,7,6,5,11,10,9,8,7]
-b = [4,3,2,1,5,4,3,2,7,6,5,4,3,8,7,6,5,4,10,9,8,7,6,5,11,10,9,8,7,6]
-
-
 def long_1(exp: list[int], k: int) -> list[int]:
-    '''Equivalent to multiplying on the left by w^{K}_0.'''
+    '''Equivalent to multiplying on the right by w^{K}_0.'''
     return exp[:k][::-1] + exp[k:][::-1]
 
 
 def long_2(exp: list[int], k: int) -> list[int]:
-    '''Equivalent to multiplying on the right by w^{K}_0.'''
+    '''Equivalent to multiplying on the left by w^{K}_0.'''
     run = [i+1 for i in range(len(exp))]
     run = long_1(run, k)
     run_dict = {i + 1: run[i] for i in range(len(run))}
-    return [run_dict[i] for i in long_1(exp, k)]
+    return [run_dict[i] for i in exp]
 
 
 def inv(exp: list[int]) -> list[int]:
@@ -42,50 +38,18 @@ def inv(exp: list[int]) -> list[int]:
 def niave_expression(perm: list[int], n: int) -> list[int]:
     '''Niave algorithm for producing a simple expression for a permutation.'''
     t = []
-    j = [i+1 for i in range(12)]
+    j = [i+1 for i in range(n)]
     for i in j[::-1]:
         if simple_to_perm(t, n)[i-1] == perm[i-1]:
             pass
         else:
-            t += [i for i in range(simple_to_perm(t, 12).index(perm[i-1]) + 1, i)]
+            t += [i for i in range(simple_to_perm(t, n).index(perm[i-1]) + 1, i)]
     return t
 
 
 def perm_concat(a: list[int], b: list[int]) -> list[int]:
     '''Computes ab as a permutation.'''
     return [a[b[i] - 1] for i in range(len(a))]
-
-
-
-def main_2(exp: list[int], n:int) -> list[int]:
-    '''Converts the types of simple expressions used in positroid varieties
-    by Galashin and Lam into a simple expression for positroid varieties
-    in the notation of Leclerc.'''
-    a = simple_to_perm(exp, n)
-    b = inv(a)
-    c = flip(b, n)
-    return niave_expression(c, 12)
-
-
-### Commented out example.
-f = main_2([4,3,2,1,5,4,3,2,7,6,5,4,3,8,7,6,5,4,10,9,8,7,6,5,11,10,9,8,7,6],12)
-print(f)
-t = simple_to_perm(f,12)
-print(t)
-print(len(f))
-g = main_2([4,3,2,1,4,3,2,7,6,5,4,3,8,6,4,10,9,8,7,6,5,11,10,9,8,7],12)
-print(g)
-s = simple_to_perm(g, 12)
-print(s)
-print(len(g))
-print(perm_concat(inv(t),s))
-
-
-
-
-
-
-
 
 
 def reflector(expression: list[int], n: int) -> list[int]:
@@ -170,7 +134,7 @@ def tilt_alg_gls(expression: list[int], n: int) -> None:
         print('-----------------------------------------------------------')
 
 import numpy as np
-def top(presentation: np.ndarray) -> list:
+def top(presentation) -> list:
     """Given a matrix representing a simple filtration we find the positions we allow to be removed by epsilon."""
     k = presentation.shape[0] + presentation.shape[1] - 2
     tops = []
@@ -190,6 +154,26 @@ def top(presentation: np.ndarray) -> list:
         k -= 1
     return tops
 
+def socle(presentation) -> list:
+    """Given a matrix representing a simple filtration we find the positions we allow to be removed by epsilon_dagger."""
+    k = 0
+    socles = []
+    while k < presentation.shape[0] + presentation.shape[1] - 1:
+        pairing = [[i,k-i] for i in range(k+1)]
+        for i in range(len(pairing)-1,-1,-1):
+            if pairing[i][0] not in range(presentation.shape[0]):
+                del pairing[i]
+            elif pairing[i][1] not in range(presentation.shape[1]):
+                del pairing[i]
+        for i in pairing:
+            above = np.copy(presentation[:i[0] + 1, :i[1] + 1])
+            above[i[0],i[1]] = 0
+            if not above.any():
+                if presentation[i[0]][i[1]] != 0:
+                    socles.append(i)
+        k += 1
+    return socles
+
 def mat_to_list_conv(filt: np.ndarray) -> list:
     """The previous function returns a numpy array so here we convert it to a list
     for use in list_to_profile."""
@@ -200,16 +184,16 @@ def mat_to_list_conv(filt: np.ndarray) -> list:
     return dim
 
 def profile_decorator(func):
-    def wrapper(w_expression: list[int], n: int) -> list:
+    def wrapper(v_expression: list[int], w_expression: list[int], n: int):
         counter = []
-        for j in func(w_expression, n):
+        for j in func(v_expression, w_expression, n):
             counter.append(mat_to_list_conv(j))
         for j in counter:
             list_to_profile(j, counter.index(j) + 1, print_filt=True)
-        return counter
+        return func(v_expression, w_expression, n), counter
     return wrapper
 
-@profile_decorator
+
 def epsilon(w_expression: list[int], n: int) -> list:
     """Given a reduced expression for w we return the string as above giving
     the filtration of the projective-injectives after applying epsilon.
@@ -233,31 +217,122 @@ def epsilon(w_expression: list[int], n: int) -> list:
     return Epsilon
 
 def index_to_perm(index: list[int], n: int) -> list[int]:
-    per = []
-    k = len(index)
-    for i in range(k-1, -1, -1):
-        per += [i for i in range(index[-1], n - k + i + 2)]
-        del index[-1]
-    return per
+    return inv(index + [i+1 for i in range(n) if i + 1 not in index])
 
-def main(W_expression: list[int], v: list[int], n: int) -> None:
+# @profile_decorator
+def proj_inj(v_expression: list[int], w_expression: list[int], n: int) -> list:
+    """Given a reduced expression for w and v we return the projective injectives in Leclerc's categorification"""
+    inv_w = simple_to_perm(w_expression[::-1], n)
+    u = perm_concat(inv_w, [i+1 for i in range(n)][::-1])
+    u_expression = niave_expression(u, n)
+    Epsilon_Dagger = []
+    for P in epsilon(u_expression, n-1):
+        expression = v_expression.copy()[::-1]
+        while len(expression) > 0:
+            socles = socle(P)
+            g = lambda x: P.shape[0] + x[1] - x[0]
+            for t in socles:
+                if g(t) == expression[-1]:
+                    P[t[0],t[1]] = 0
+            del expression[-1]
+        Epsilon_Dagger.append(P)
+    return Epsilon_Dagger
+
+def necklace(profiles, v: list[int], n:int) -> list[list]:
+    Necklace= []
+    for J in profiles:
+        g = lambda x: J.shape[0] + x[1] - x[0]
+        tops = [i for i in sorted(top(J), key = lambda r : r[0], reverse= True)]
+        x = [i[0] for i in sorted(top(J), key = lambda r : r[0], reverse=True)]
+        splice = []
+        for j in range(len(x) - 1):
+            splice += [g(tops[j]) + t + 1 for t in range(abs(x[j+1] - x[j]))]
+        splice += [g(tops[-1]) + t + 1 for t in range(abs(x[-1] + 1))]
+        ind = [i+1 for i in range(len(v) - len(splice))]
+        splice = ind + splice
+        print(splice)
+        Necklace.append([max(i,j) for (i,j) in zip(splice,v)])
+    Necklace = [v] + Necklace
+    return Necklace
+
+
+
+
+def main(w_expression: list[int], v: list[int], k: int, n: int, Projective_Injective = False, Tilting = False, Necklace = False, Galashin_Lam = False) -> None:
     """Given a reduced expression for w and a k-index v giving rise to a Grassmannian
-    Richardson variety in Gr(k,n+1) we implement an alogrithm to produce a tilting module in Leclerc's
-    C_{w}. This then must be quotiented by the maximal submodule in C_{v}. We construct the module
-    whose factors give C_{v}. This speeds up the process of computing tilting objects in Leclerc's
-    categorification when v = w^{K}_0 u for W^{K} parabolic associated to a Grassmannian and
-    u in W^{K}\W."""
-    print('First we produce the cluster-tilting object in C_w \n')
-    tilt_alg_gls(W_expression, n)
-    print(f'Each summand must then be quotiented by a maximal submodule which is a factor of the following module:')
-    epsilon(index_to_perm(v, n), n)
+    Richardson variety in Gr(k,n+1) we return useful information about the categorifications.
+
+     In particular Projective_Injective = True produces the projective-injective objects
+     in Leclerc's category.
+
+     Tilting = True performs an algorithm found in Leclerc's paper giving rise to a cluster tilting object in Leclerc's
+     category.
+
+     Necklace = True returns the necklace which porjects down onto Leclerc's projective injectives under the
+     functor pi_v.
+
+     Galashin_Lam = True uses a slightly different convention as described in the paper 'Positroid varieties and
+     cluster algebras'. When Galashin_Lam = True we convert their permutations to the Leclerc and perform any computations there."""
+    if Necklace:
+        Projective_Injective = True
+    if Galashin_Lam:
+        w_expression = niave_expression(flip(simple_to_perm(v,n + 1), n+1), n+1)
+        v = sorted(inv(flip(simple_to_perm(w_expression, n+1), n + 1))[:k+1])
+    if Projective_Injective:
+        v_expression = niave_expression(long_2(index_to_perm(v, n+1), k), n+1)
+        pi = proj_inj(v_expression, w_expression, n+1)
+        if Necklace:
+            print(necklace(pi, v, n+1))
+    if Tilting:
+        print('First we produce the cluster-tilting object in C_w \n')
+        tilt_alg_gls(w_expression, n)
+        print(f'Each summand must then be quotiented by a maximal submodule which is a factor of the following module:')
+        v_adapt = niave_expression(long_2(index_to_perm(v, n+1), k), n+1)
+        counter = []
+        for j in epsilon(v_adapt,n):
+            counter.append(mat_to_list_conv(j))
+        for j in counter:
+            list_to_profile(j, counter.index(j) + 1, print_filt=True)
 
 
-W_expression = [6, 7, 8, 9, 10, 11, 4, 5, 6, 7, 8, 9, 10, 7, 8, 9, 2, 3, 4, 5, 6, 7, 8,
-                1, 2, 3, 4, 5, 6, 7, 4, 5, 6, 5, 1, 2, 3, 4, 1, 3]
-v = [1, 2, 4, 5, 7, 8]
-n = 11
+
+w_expression =  niave_expression(long_2(index_to_perm([3,6,8,9], 9), 4), 9)
+v = [1,2,4,6]
+# v = [4,3,2,1,4,3,2,7,6,5,4,3,8,6,4,10,9,8,7,6,5,11,10,9,8,7]
+# w_expression = [4,3,2,1,5,4,3,2,7,6,5,4,3,8,7,6,5,4,10,9,8,7,6,5,11,10,9,8,7,6]
+k = 4
+n = 8
+Projective_Injective = False
+Tilting = False
+Necklace = True
+Galashin_Lam = False
 
 # if __name__ == '__main__':
-#     main(W_expression, v, n)
+#     main(w_expression, v, k, n, Projective_Injective, Tilting, Necklace, Galashin_Lam)
+v_expression = niave_expression(long_2(index_to_perm(v, n+1), k), n+1)
+for j in proj_inj(v_expression, w_expression, n+1):
+    print(j)
+    print(j.shape)
+# print(necklace(proj_inj(v_expression, w_expression, n+1), v, n+1))
+
+#current issue stemming from hidden shape of matrices in necklace hddien by deleting socles.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
