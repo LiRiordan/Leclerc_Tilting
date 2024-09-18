@@ -77,3 +77,22 @@ def width(mat: np.ndarray) -> int:
             Width += 1
     return Width
 
+def list_to_array(dimension_vector: list[int], socle: int) -> np.ndarray:
+    hit = np.zeros([socle, len(dimension_vector) + 1 - socle])
+    g = lambda x: hit.shape[0] + x[1] - x[0]
+    k = 0
+    while k < hit.shape[0] + hit.shape[1] - 1:
+        pairing = [[i, k - i] for i in range(k + 1)]
+        for i in range(len(pairing) - 1, -1, -1):
+            if pairing[i][0] not in range(hit.shape[0]):
+                del pairing[i]
+            elif pairing[i][1] not in range(hit.shape[1]):
+                del pairing[i]
+        for i in pairing:
+            if not any(dimension_vector):
+                break
+            if dimension_vector[g(i) - 1] != 0:
+                hit[i[0],i[1]] = 1
+                dimension_vector[g(i) - 1] -= 1
+        k+=1
+    return hit

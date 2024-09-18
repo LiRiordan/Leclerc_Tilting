@@ -28,8 +28,10 @@ w_var = tk.StringVar(root)
 tabControl = Notebook(root)
 home_tab = tk.Frame(tabControl)
 necklace_tab = tk.Frame(tabControl)
+tilting = tk.Frame(tabControl)
 tabControl.add(home_tab, text='Home')
 tabControl.add(necklace_tab, text = 'Necklaces')
+tabControl.add(tilting, text = 'Tilting modules')
 tabControl.pack(expand=1, fill="both")
 
 ### Insert stylings
@@ -139,13 +141,13 @@ def Leclerc():
 
 def Help():
     messagebox.showinfo(title = "What's going on?", message="In Leclerc's convention, a Grassmannian positroid"
-                                                            "corresponds to a pair (v,w) with v = w^{K}_0 u and w greater"
-                                                            "than or equal to v. In Galashin and Lam's convention they"
-                                                            "use pairs (v,w) where w is a minimal length"
-                                                            "representative for a coset W/W^{K}. Our standard is Leclerc's "
-                                                            "but if you want to use Galashin and Lam's then just enter a simple "
-                                                            "filtration for v,w and make sure your convention 'button' is set"
-                                                            "to Galashin Lam.")
+                                                            " corresponds to a pair (v,w) with v = w^{K}_0 u and w greater"
+                                                            " than or equal to v. In Galashin and Lam's convention they"
+                                                            " use pairs (v,w) where w is a minimal length"
+                                                            " representative for a coset W/W^{K}. Our standard is Leclerc's "
+                                                            " but if you want to use Galashin and Lam's then just enter a simple "
+                                                            " filtration for v,w and make sure your convention 'button' is set"
+                                                            " to Galashin Lam.")
 
 GL = tk.Button(necklace_tab, text = 'Galashin Lam', command=GalshinLam, width = 10, height = 1)
 GL.place(x = 300, y=145)
@@ -183,14 +185,21 @@ def display_necklace():
     p = [f'M_{i}    ' for i in J]
     for i in list(set(p)):
         out += i
+    out += f'( quotiented by M_{v})'
     txt = tk.Text(necklace_tab)
-    txt.place(relx = 0, rely = 0.6, relwidth= 0.9, relheight=0.05)
+    txt.place(relx = 0, rely = 0.6, relwidth= 0.9, relheight=0.25)
     txt.insert(tk.END, out)
 
 
 
 compute = tk.Button(necklace_tab, text = 'Give me my modules', command=display_necklace, width = 10, height = 1)
 compute.place(relx=0.6, rely = 0.3, relwidth=0.2, relheight=0.03)
+
+
+
+### Tilting tab:
+
+
 
 
 

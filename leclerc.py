@@ -78,5 +78,4 @@ def necklace(profiles, v: list[int], widths: list[int]) -> list[list]:
             ind = [i+1 for i in range(len(v) - widths[t])]
             splice = ind + splice
             Necklace.append([max(i,j) for (i,j) in zip(splice,v)])
-    Necklace = [v] + Necklace
     return Necklace

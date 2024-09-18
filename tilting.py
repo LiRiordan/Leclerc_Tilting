@@ -1,4 +1,4 @@
-from present import list_to_profile
+from present import list_to_profile, list_to_array
 def reflector(expression: list[int], n: int) -> list[int]:
     """We follow the algorithm in the Leclerc paper on cluster structures in
     strata of Grassmannians and treat a:list[int] as the indices for a reduced
@@ -26,13 +26,14 @@ def reflector(expression: list[int], n: int) -> list[int]:
 
 
 
-def tilt_alg_gls(expression: list[int], n: int) -> None:
+def tilt_alg_gls(expression: list[int], n: int) -> list:
     """We now implement Leclerc's algorithm by taking sequential subwords of the reduced
     expression for w and applying the above process. This gives a tilting object in C_{w}"""
     total = []
     reversed_expression = expression[::-1]
     for i in range(len(expression)):
         total.append([reflector(reversed_expression[:i+1], n), reversed_expression[i]])
-    for j in total:
-        print(list_to_profile(j[0], j[1]))
-        print('-----------------------------------------------------------')
+    return [list_to_array(j[0], j[1]) for j in total]
+
+
+# def tilter(v: list[int], w_expression: list[int], k: int, n: int) -> str:
