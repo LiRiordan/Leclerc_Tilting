@@ -1,7 +1,7 @@
 import numpy as np
-from homological import top, socle
+from homological import top, socle, index_from_v
 from permutations import simple_to_perm, perm_concat, niave_expression, long_1
-from present import width, profile_decorator
+from present import width, profile_decorator, disconnect, mat_to_num
 
 def epsilon(w_expression: list[int], n: int) -> list:
     """Given a reduced expression for w we return the string as above giving
@@ -64,18 +64,9 @@ def necklace(profiles, v: list[int], widths: list[int]) -> list[list]:
     extensions with the lifts of Leclerc's projective injectives.'''
     Necklace= []
     for t in range(len(profiles)):
-        J = profiles[t]
-        g = lambda x: J.shape[0] + x[1] - x[0]
-        tops = [i for i in sorted(top(J), key = lambda r : r[0], reverse= True)]
-        if len(tops) == 0:
-            pass
-        else:
-            x = [i[0] for i in sorted(top(J), key = lambda r : r[0], reverse=True)]
-            splice = []
-            for j in range(len(x) - 1):
-                splice += [g(tops[j]) + t + 1 for t in range(abs(x[j+1] - x[j]))]
-            splice += [g(tops[-1]) + t + 1 for t in range(abs(x[-1] + 1))]
-            ind = [i+1 for i in range(len(v) - widths[t])]
-            splice = ind + splice
-            Necklace.append([max(i,j) for (i,j) in zip(splice,v)])
+        J = disconnect(profiles[t])
+        for i in J:
+            Necklace.append(index_from_v(v, i))
+        while v in Necklace:
+            Necklace.remove(v)
     return Necklace

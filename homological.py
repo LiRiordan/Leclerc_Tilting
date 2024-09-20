@@ -1,4 +1,5 @@
 import numpy as np
+
 def top(presentation) -> list:
     """Given a matrix representing a simple filtration we find the positions we allow to be removed by epsilon."""
     k = presentation.shape[0] + presentation.shape[1] - 2
@@ -42,75 +43,75 @@ def socle(presentation) -> list:
     return socles
 
 
+def clear(s: np.ndarray):
+    for r in range(s.shape[1] - 1, -1, -1):
+        if not any(s[:, r]):
+            s = np.delete(s, r, axis=1)
+    for t in range(s.shape[0] - 1, -1, -1):
+        if not any(s[t, :]):
+            s = np.delete(s, t, axis=0)
+    return s
+
+def kill(mat: np.ndarray, index: list[int]) -> np.ndarray:
+    cmat = np.copy(mat)
+    cmat[index[0],index[1]] = 0
+    return cmat
+
+
 
 def submodules(hit: np.ndarray) -> list:
-    sub = []
-    g = lambda x: hit.shape[0] + x[1] - x[0]
-    for i in range(hit.shape[0]):
-        for j in range(hit.shape[1]):
-            if hit[i,j] ==0:
-                pass
-            else:
-                s = np.copy(hit[:i+1,:j+1])
-                for r in range(s.shape[1] -1, -1, -1):
-                    if not any(s[:,r]):
-                        s = np.delete(s,r,axis = 1)
-                for t in range(s.shape[0] -1, -1, -1):
-                    if not any(s[t,:]):
-                        s = np.delete(s, t, axis = 0)
-                sub.append([s, g([i,j]), [i,j]])
-    return sub
+    sub = [hit]
+    a = hit.copy()
+    if not np.any(a):
+        return []
+    else:
+        t = top(a)
+        for i in t:
+            sub += submodules(kill(a,i))
+        return sub
 
 
 def quotients(hit: np.ndarray) -> list:
-    quot = []
-    g = lambda x: hit.shape[0] + x[1] - x[0]
-    for i in range(hit.shape[0]):
-        for j in range(hit.shape[1]):
-            if hit[i,j] ==0:
-                pass
-            else:
-                q = np.copy(hit[i:,j:])
-                for r in range(q.shape[1] -1, -1, -1):
-                    if not any(q[:,r]):
-                        q = np.delete(q,r,axis = 1)
-                for t in range(q.shape[0] -1, -1, -1):
-                    if not any(q[t,:]):
-                        q = np.delete(q, t, axis = 0)
-                quot.append([q,g([i+q.shape[0] - 1,j+q.shape[1] - 1])])
-    return quot
+    quot = [hit]
+    a = hit.copy()
+    if not np.any(a):
+        return []
+    else:
+        s = socle(a)
+        for j in s:
+            quot += quotients(kill(a,j))
+        return quot
 
 
 def max_quotient(profiles_1, profiles_2):
     new =[]
     for j in profiles_2:
-        k = submodules(j)
+        g1 = lambda x: j.shape[0] + x[1] - x[0]
         for t in profiles_1:
+            g2 = lambda x: t.shape[0] + x[1] - x[0]
             for l in quotients(t):
-                for m in k:
-                    if np.array_equal(l[0], m[0]) and l[1] == m[1]:
-                        pos = m[2]
-                        j[:pos[0] + 1,:pos[1] + 1] = 0
+                for m in submodules(j):
+                    a = [g1(i) for i in top(m)]
+                    b = [g2(k) for k in top(l)]
+                    if np.array_equal(clear(l), clear(m)) and a == b:
+                        for i in top(m):
+                            j[:i[0] + 1,:i[1] + 1] = 0
         new.append(j)
     return new
 
-def lec_to_cmc(profiles):
-    out = []
-    for t in range(len(profiles)):
-        J = profiles[t]
-        g = lambda x: J.shape[0] + x[1] - x[0]
-        tops = [i for i in sorted(top(J), key = lambda r : r[0], reverse= True)]
-        if len(tops) == 0:
-            pass
-        else:
-            x = [i[0] for i in sorted(top(J), key = lambda r : r[0], reverse=True)]
-            splice = []
-            for j in range(len(x) - 1):
-                splice += [g(tops[j]) + t + 1 for t in range(abs(x[j+1] - x[j]))]
-            splice += [g(tops[-1]) + t + 1 for t in range(abs(x[-1] + 1))]
-            ind = [i+1 for i in range(len(v) - widths[t])]
-            splice = ind + splice
-            Necklace.append([max(i,j) for (i,j) in zip(splice,v)])
-    return Necklace
 
-### Need to convert, also add the normal v^{-1}w necklace one
+def index_from_v(v:list[int], matrix: np.ndarray) -> list[int]:
+    t = v.copy()
+    g = lambda x: matrix.shape[0] + x[1] - x[0]
+    for i in range(matrix.shape[0]):
+        hits = np.unique([g([i,j])*matrix[i,j] for j in range(len(matrix[i,:]))])
+        if any(hits):
+            if hits[0] == 0:
+                low = hits[1]
+            else:
+                low = hits[0]
+            high = hits[-1]
+            m = v.index(low)
+            t[m] = int(high) + 1
+    return t
+

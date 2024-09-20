@@ -96,3 +96,60 @@ def list_to_array(dimension_vector: list[int], socle: int) -> np.ndarray:
                 dimension_vector[g(i) - 1] -= 1
         k+=1
     return hit
+
+def k_split(a:int, b:int, k:list[int]):
+    out_1 = []
+    out_2 = []
+    out_3 = []
+    for i in range(a):
+        for j in range(b):
+            if i - j < k[1]:
+                out_1.append([i,j])
+            elif i - j > k[0]:
+                out_2.append([i,j])
+            else:
+                out_3.append([i,j])
+    return out_1, out_2, out_3
+
+
+def disconnect(matrix: np.ndarray) -> list:
+    split = []
+    k = 0
+    while k < matrix.shape[0] + matrix.shape[1] - 1:
+        pairing = [[matrix.shape[0] - 1 - i, k - i] for i in range(k+1) if -1 < (k-i) < matrix.shape[1] and -1 < (matrix.shape[0] - 1 - i) < matrix.shape[0]]
+        if any([matrix[p[0],p[1]] for p in pairing]):
+            pass
+        else:
+            split.append(k)
+        k += 1
+    if len(split) ==0:
+        return [matrix]
+    else:
+        split = [-1] + split + [matrix.shape[0] + matrix.shape[1]]
+        out = []
+        for i in range(len(split)-1):
+            J, K, L = k_split(matrix.shape[0], matrix.shape[1], [matrix.shape[0] - 1 - split[i],matrix.shape[0] - 1 - split[i+1]])
+            f1 = np.copy(matrix)
+            A = [f1[i[0],i[1]] for i in L]
+            C = sum(A)
+            if not (C== 0):
+                a = np.copy(matrix)
+                for i in J:
+                    a[i[0],i[1]] = 0
+                for j in K:
+                    a[j[0],j[1]] = 0
+                out.append(a)
+        if len(out) == 0:
+            out.append(matrix)
+        return out
+
+
+def mat_to_num(matrix: np.ndarray) -> np.ndarray:
+    g = lambda x: matrix.shape[0] + x[1] - x[0]
+    for i in range(matrix.shape[0]):
+        for j in range(matrix.shape[1]):
+            matrix[i,j] = g([i,j])*matrix[i,j]
+    return matrix
+
+
+
