@@ -1,7 +1,7 @@
 import numpy as np
 from homological import top, socle, index_from_v
 from permutations import simple_to_perm, perm_concat, niave_expression, long_1
-from present import width, profile_decorator, disconnect, mat_to_num
+from present import width,disconnect
 
 def epsilon(w_expression: list[int], n: int) -> list:
     """Given a reduced expression for w we return the string as above giving
@@ -26,7 +26,7 @@ def epsilon(w_expression: list[int], n: int) -> list:
     return Epsilon
 
 
-@profile_decorator
+
 def proj_inj(v_expression: list[int], w_expression: list[int], n: int, show = False) -> list:
     """Given a reduced expression for w and v we return the projective injectives in Leclerc's categorification"""
     inv_w = simple_to_perm(w_expression[::-1], n)
@@ -52,7 +52,7 @@ def width_set(w_expression: list[int], k: int, n: int) -> list[int]:
     return [width(J) for J in S]
 
 
-def necklace(profiles, v: list[int], widths: list[int]) -> list[list]:
+def necklace(profiles, v: list[int]) -> list[list]:
     '''Given a k index, v, and a simple expression for a permutation, w, such that the Schubert cell X_w contains X_v
     we perform Leclerc's epsilon and epsilon dagger functors to produce the projective injectives in Leclerc's
     category C_{v,w}.

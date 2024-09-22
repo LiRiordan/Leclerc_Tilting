@@ -1,16 +1,13 @@
 import numpy as np
+from present import index_from_v, disconnect
 
-def top(presentation) -> list:
+
+def top(presentation:np.ndarray) -> list:
     """Given a matrix representing a simple filtration we find the positions we allow to be removed by epsilon."""
     k = presentation.shape[0] + presentation.shape[1] - 2
     tops = []
     while k > -1:
-        pairing = [[i,k-i] for i in range(k+1)]
-        for i in range(len(pairing)-1,-1,-1):
-            if pairing[i][0] not in range(presentation.shape[0]):
-                del pairing[i]
-            elif pairing[i][1] not in range(presentation.shape[1]):
-                del pairing[i]
+        pairing = [[presentation.shape[0] - 1 - i, k - i] for i in range(k+1) if -1 < (k-i) < presentation.shape[1] and -1 < (presentation.shape[0] - 1 - i) < presentation.shape[0]]
         for i in pairing:
             above = np.copy(presentation[i[0]:, i[1]:])
             above[0,0] = 0
@@ -22,17 +19,12 @@ def top(presentation) -> list:
 
 
 
-def socle(presentation) -> list:
+def socle(presentation: np.ndarray) -> list:
     """Given a matrix representing a simple filtration we find the positions we allow to be removed by epsilon_dagger."""
     k = 0
     socles = []
     while k < presentation.shape[0] + presentation.shape[1] - 1:
-        pairing = [[i,k-i] for i in range(k+1)]
-        for i in range(len(pairing)-1,-1,-1):
-            if pairing[i][0] not in range(presentation.shape[0]):
-                del pairing[i]
-            elif pairing[i][1] not in range(presentation.shape[1]):
-                del pairing[i]
+        pairing = [[presentation.shape[0] - 1 - i, k - i] for i in range(k+1) if -1 < (k-i) < presentation.shape[1] and -1 < (presentation.shape[0] - 1 - i) < presentation.shape[0]]
         for i in pairing:
             above = np.copy(presentation[:i[0] + 1, :i[1] + 1])
             above[i[0],i[1]] = 0
@@ -42,8 +34,20 @@ def socle(presentation) -> list:
         k += 1
     return socles
 
+def profile_decorator(func):
+    def wrapper(profiles_1: list[np.ndarray], profiles_2: list[np.ndarray], v:list[int]):
+        counter = []
+        out = []
+        for j in func(profiles_1, profiles_2, v):
+            counter += disconnect(j)
+        for j in counter:
+            out += [index_from_v(v, j)]
+        return func(profiles_1, profiles_2, v), out
+    return wrapper
 
-def clear(s: np.ndarray):
+
+
+def clear(s: np.ndarray) -> np.ndarray:
     for r in range(s.shape[1] - 1, -1, -1):
         if not any(s[:, r]):
             s = np.delete(s, r, axis=1)
@@ -52,10 +56,20 @@ def clear(s: np.ndarray):
             s = np.delete(s, t, axis=0)
     return s
 
+
+
 def kill(mat: np.ndarray, index: list[int]) -> np.ndarray:
     cmat = np.copy(mat)
     cmat[index[0],index[1]] = 0
     return cmat
+
+
+
+def list_slam(l:list) -> list[int]:
+    out = []
+    for i in l:
+        out += i
+    return out
 
 
 
@@ -68,7 +82,11 @@ def submodules(hit: np.ndarray) -> list:
         t = top(a)
         for i in t:
             sub += submodules(kill(a,i))
+        g = [list_slam(sorted(top(a))) for a in sub]
+        indices = [g.index(list(l)) for l in set(map(tuple, g))]
+        sub = [sub[i] for i in indices]
         return sub
+
 
 
 def quotients(hit: np.ndarray) -> list:
@@ -80,38 +98,91 @@ def quotients(hit: np.ndarray) -> list:
         s = socle(a)
         for j in s:
             quot += quotients(kill(a,j))
+        g = [list_slam(sorted(socle(a))) for a in quot]
+        indices = [g.index(list(l)) for l in set(map(tuple, g))]
+        quot = [quot[i] for i in indices]
         return quot
 
+def simple_quotients(hit: np.ndarray) -> list:
+    g = lambda x: hit.shape[0] - x[0] + x[1]
+    sim_soc_quot = [[np.copy(hit), g([0,0])]]
+    for i in range(hit.shape[0]):
+        for j in range(hit.shape[1]):
+            if hit[i,j] == 0:
+                pass
+            else:
+                a = hit.copy()
+                for l in range(i):
+                    a[:l+1,:] = 0
+                for k in range(j):
+                    a[:,:k+1] = 0
+                sim_soc_quot.append([a,g([i,j])])
+    return sim_soc_quot
 
-def max_quotient(profiles_1, profiles_2):
+
+def socle_quotients(hit: np.ndarray, socle: int) -> list:
+    pairing = []
+    for i in range(hit.shape[0]):
+        for j in range(hit.shape[1]):
+            if j - i == socle - hit.shape[0]:
+                pairing.append([i,j])
+    out = []
+    for p in pairing:
+        if hit[p[0],p[1]] ==0:
+            pass
+        else:
+            a = hit.copy()
+            for l in range(p[0]):
+                a[l, :] = 0
+            for k in range(p[1]):
+                a[:, k] = 0
+            out.append(clear(a))
+    return out
+
+
+@profile_decorator
+def simple_max_quotient(profiles_1: list[np.ndarray], profiles_2: list[np.ndarray], v:list[int]) -> list[np.ndarray]:
+    new = []
+    for j in profiles_2:
+        for t in profiles_1:
+            q = socle_quotients(t, j.shape[0])
+            run = True
+            while len(q) > 0 and run:
+                m = q[0]
+                if m.shape[0] <= j.shape[0] and m.shape[1] <= j.shape[1]:
+                    a = top(m)
+                    if all([j[i[0],i[1]] for i in a]):
+                        l = []
+                        for c in range(m.shape[0]):
+                            for d in range(m.shape[1]):
+                                if m[c,d] == 1:
+                                    l.append([c,d])
+                        for h in l:
+                            j[h[0],h[1]] = 0
+                        run = False
+                del q[0]
+        new.append(j)
+    return new
+
+
+@profile_decorator
+def max_quotient(profiles_1:list[np.ndarray], profiles_2:list[np.ndarray], v:list[int]) -> list[np.ndarray]:
     new =[]
     for j in profiles_2:
         g1 = lambda x: j.shape[0] + x[1] - x[0]
         for t in profiles_1:
             g2 = lambda x: t.shape[0] + x[1] - x[0]
-            for l in quotients(t):
+            q = quotients(t)
+            for l in q:
                 for m in submodules(j):
                     a = [g1(i) for i in top(m)]
                     b = [g2(k) for k in top(l)]
-                    if np.array_equal(clear(l), clear(m)) and a == b:
+                    if np.array_equal(clear(l), clear(m)) and a==b:
                         for i in top(m):
                             j[:i[0] + 1,:i[1] + 1] = 0
         new.append(j)
     return new
 
 
-def index_from_v(v:list[int], matrix: np.ndarray) -> list[int]:
-    t = v.copy()
-    g = lambda x: matrix.shape[0] + x[1] - x[0]
-    for i in range(matrix.shape[0]):
-        hits = np.unique([g([i,j])*matrix[i,j] for j in range(len(matrix[i,:]))])
-        if any(hits):
-            if hits[0] == 0:
-                low = hits[1]
-            else:
-                low = hits[0]
-            high = hits[-1]
-            m = v.index(low)
-            t[m] = int(high) + 1
-    return t
+
 

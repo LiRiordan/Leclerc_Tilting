@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def gap(filt: list[int]) -> list[int]:
     """Reformats lists in a useful way for presenting simple filtrations."""
     out = []
@@ -57,19 +58,6 @@ def mat_to_list_conv(filt: np.ndarray) -> list:
     return dim
 
 
-def profile_decorator(func):
-    def wrapper(v_expression: list[int], w_expression: list[int], n: int, show):
-        if show:
-            counter = []
-            for j in func(v_expression, w_expression, n):
-                counter.append(mat_to_list_conv(j))
-            for j in counter:
-                list_to_profile(j, counter.index(j) + 1, print_filt=True)
-            return func(v_expression, w_expression, n), counter
-        else:
-            return func(v_expression, w_expression, n)
-    return wrapper
-
 def width(mat: np.ndarray) -> int:
     Width = 0
     for i in range(mat.shape[0]):
@@ -112,7 +100,7 @@ def k_split(a:int, b:int, k:list[int]):
     return out_1, out_2, out_3
 
 
-def disconnect(matrix: np.ndarray) -> list:
+def disconnect(matrix: np.ndarray) -> list[np.ndarray]:
     split = []
     k = 0
     while k < matrix.shape[0] + matrix.shape[1] - 1:
@@ -152,4 +140,17 @@ def mat_to_num(matrix: np.ndarray) -> np.ndarray:
     return matrix
 
 
-
+def index_from_v(v:list[int], matrix: np.ndarray) -> list[int]:
+    t = v.copy()
+    g = lambda x: matrix.shape[0] + x[1] - x[0]
+    for i in range(matrix.shape[0]):
+        hits = np.unique([g([i,j])*matrix[i,j] for j in range(len(matrix[i,:]))])
+        if any(hits):
+            if hits[0] == 0:
+                low = hits[1]
+            else:
+                low = hits[0]
+            high = hits[-1]
+            m = v.index(low)
+            t[m] = int(high) + 1
+    return t

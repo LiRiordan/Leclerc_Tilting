@@ -79,4 +79,21 @@ def perm_necklace(v:list[int] , v_perm:list[int], w:list[int], n, flip = False) 
          return out
 
 
+def s_sb_w(v:list[int],v_perm:list[int],w:list[int], n:int) -> list[list[int]]:
+    sigma = perm_concat(w, inv(v_perm))
+    out = []
+    for i in range(n):
+        out.append(sorted([j+1 for j in range(n) if cyclic_order(j+1, sigma[j], i + 1, n)]))
+    for j in range(n):
+        if j + 1 == sigma[j] and (j + 1) in v:
+            out = [sorted(a + [j + 1]) for a in out]
+    out1 = []
+    for i in out:
+        out1.append(sorted([inv(v_perm)[j-1] for j in i]))
+    return out1
+
+
+
+
+
 
