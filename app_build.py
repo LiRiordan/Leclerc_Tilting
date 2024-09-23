@@ -2,14 +2,19 @@ import tkinter as tk
 from tkinter.ttk import Label, Style, Notebook, Entry
 from leclerc import necklace
 from permutations import *
-from leclerc import proj_inj, width_set
+from leclerc import proj_inj
 from tilting import tilter
 
-necklace_string = "Necklace:\nIn the Necklace tab we take a k-index and permutation w and produce a list " \
-                  "of rank one modules whose projection under pi_v gives Leclerc's projective\ninjective modules."
-tilting_string = "Tilting:\nGiven v and w we perform steps of a algorithm contained in Leclerc's paper" \
-                 " 'Cluster structures on strata of flag varieties' \nto help describe a cluster" \
-                 "tilting object in his category C_{v,w}."
+necklace_string = "Given a pair (v,w) with v a maximal length representative of  coset in W^{K}\ W and w >= v" \
+                  " there is a positroid variety. The information of v can be given as a k-index and for w\n" \
+                  "we take a reduced expression."
+tilting_string = "Given a k-index for v (entered as v_1,v_2,v_3,...,v_k) and a reduced expression for w (entered" \
+                 " as i_1,i_2,...,i_t) our first tab computes projective injectives. \nFirst it finds the lifts of projective" \
+                 "-injectives in Leclerc's category. Then it finds the necklace from S-SB-W. Finally it also computes the " \
+                 "two necklaces associated to v^{-1}w. \nThe final tab uses Leclerc's algorithm to compute the lift" \
+                 " of a tilting object in his catgorification of the positroid. \nIn the necklace case if your w is associated to" \
+                 " a k-index aswell then you can save time by typing iw_1,w_,w_3,...,w_k and then it will use the w associated to" \
+                 " this index. \nMake sure not to leave any spaces when entering v and w."
 
 
 ###Defining root
@@ -66,14 +71,14 @@ btn_dark.place(relwidth = 0.1, relheight=0.05, relx = 0.05, rely = 0.2)
 btn_light = tk.Button(home_tab, text = 'Light Mode', command=light_mode)
 btn_light.place(relwidth = 0.1, relheight=0.05, relx = 0.05, rely = 0.25)
 
-label2 = Label(frame1, text = "Welcome to Kwivah: \nLet's have a look at what we can do in here.", style = 'New2.TLabel', background='#999966')
+label2 = Label(frame1, text = "Welcome to Kwivah: \nHow should we use this app?.", style = 'New2.TLabel', background='#999966')
 label2.place(relx=0.3, rely = 0.2, relwidth=0.4, relheight=0.2)
 
 label3 = Label(frame1, text = necklace_string, style='New3.TLabel', background='#999966')
 label3.place(relx=0.1, rely = 0.45, relwidth= 0.8, relheight=0.1)
 
 label4 = Label(frame1, text = tilting_string, style='New3.TLabel', background='#999966')
-label4.place(relx=0.1, rely = 0.6, relwidth= 0.8, relheight=0.1)
+label4.place(relx=0.1, rely = 0.6, relwidth= 0.8, relheight=0.2)
 
 ###Necklace tab:
 
