@@ -191,20 +191,34 @@ def display_necklace():
     out += "\n \nSerhiyenko, Shermann-Bennett and Williams give the necklace:\n"
     ssbw = s_sb_w(v, v_perm, w, n)
     f =  [f'M_{i}    ' for i in ssbw]
-    for i in sorted(list(set(f))):
+    for i in f:
         out += i
 
     out += "\n \nThe standard necklace associated to (v,w) gives:\n"
     ne = perm_necklace(v, v_perm, w, n)
     r = [f'M_{i}    ' for i in ne]
-    for i in sorted(list(set(r))):
+    for i in r:
         out += i
 
     out += "\n \nThe opposite necklace for (v,w) gives:\n"
     ne1 = perm_necklace(v, v_perm, w, n, flip = True)
     t = [f'M_{i}    ' for i in ne1]
-    for i in sorted(list(set(t))):
+    for i in t:
         out += i
+
+    out += "\n \nThe matroid associated to the standard necklace is:\n"
+    m = matroid(ne)
+    ma = [f'M_{i}    ' for i in m]
+    for i in sorted(list(set(ma))):
+        out += i
+
+    out += "\n \nThe postroid associated to the standard necklace is:\n"
+    P = [a for a in m if all([weakly_seperated(a,b) for b in ne])]
+    post = [f'M_{i}    ' for i in P]
+    for i in sorted(list(set(post))):
+        out += i
+
+
 
     txt = tk.Text(necklace_tab)
     txt.place(relx = 0, rely = 0.6, relwidth= 0.9, relheight=0.25)

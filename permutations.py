@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def simple_to_perm(expression: list[int], n: int) -> list[int]:
     '''Takes a simple expression in format list[int], and the number n with the
     permutation of n letters and returns the corresponding permutation giving the bottom row of the
@@ -91,6 +94,75 @@ def s_sb_w(v:list[int],v_perm:list[int],w:list[int], n:int) -> list[list[int]]:
     for i in out:
         out1.append(sorted([inv(v_perm)[j-1] for j in i]))
     return out1
+
+import itertools as it
+
+def matroid(necklace:list[list[int]]) -> list[list[int]]:
+    k = len(necklace[0])
+    n = len(necklace)
+    N = [cyclic_min(necklace,c,n) for c in range(n)]
+    S = [list(b) for b in it.combinations([i+1 for i in range(n)],k)]
+    remove = []
+    for s in S:
+        for i in range(n):
+            c = [i+1 for i in range(n)][i:] + [i+1 for i in range(n)][:i]
+            test = True
+            s = sorted(s, key=lambda x: c.index(x))
+            p = sorted(N[i], key=lambda x: c.index(x))
+            for j in range(k):
+                if cyclic_order(p[j], s[j], i + 1, n) or p[j] == s[j]:
+                    pass
+                else:
+                    test = False
+                    break
+            if not test:
+                remove.append(sorted(s))
+    _, indices = np.unique(remove, return_index=True, axis = 0)
+    r = [remove[i] for i in indices]
+    for a in r:
+        del S[S.index(a)]
+    return S
+
+def cyclic_min(l1: list[list[int]], c:int, n:int):
+    b = [i + 1 for i in range(n)][c:] + [i + 1 for i in range(n)][:c]
+    l2 = map(lambda i: sorted(i, key=lambda y: b.index(y)), l1)
+    l3 = [list(j) for j in list(l2)]
+    k = len(l3[0])
+    p = []
+    for s in l3:
+        worked = True
+        for i in range(k):
+            for j in l3:
+                if not cyclic_order(s[i], j[i], c + 1, n) and s[i] != j[i]:
+                    worked = False
+        if worked:
+            p.append(sorted(s))
+    if len(p) != 0:
+        return p[0]
+    else:
+        print('No minimum found')
+
+
+def weakly_seperated(q:list[int], w:list[int]) -> bool:
+    l1 = q.copy()
+    l2 = w.copy()
+    n = max(l1 + l2)
+    ws = False
+    for i in range(n):
+        if i+1 in l1 and i+1 in l2:
+            del l1[l1.index(i+1)]
+            del l2[l2.index(i+1)]
+    if len(l1) == 0:
+        ws = True
+    else:
+        for j in range(n):
+            b = [i+1 for i in range(n)][j:] + [i+1 for i in range(n)][:j]
+            if (max([b.index(y) for y in l1]) < min([b.index(z) for z in l2])) or (max([b.index(y) for y in l2]) < min([b.index(z) for z in l1])):
+                ws = True
+    return ws
+
+
+
 
 
 
