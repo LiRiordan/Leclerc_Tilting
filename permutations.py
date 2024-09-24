@@ -96,4 +96,3 @@ def s_sb_w(v:list[int],v_perm:list[int],w:list[int], n:int) -> list[list[int]]:
 
 
 
-

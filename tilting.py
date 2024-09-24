@@ -1,8 +1,7 @@
 from present import list_to_array, disconnect, mat_to_num
 from permutations import niave_expression, long_2, index_to_perm, perm_concat, inv
 from leclerc import epsilon
-from homological import simple_max_quotient, index_from_v
-import numpy as np
+from homological import simple_max_quotient
 from time import perf_counter
 
 def reflector(expression: list[int], n: int) -> list[int]:
@@ -48,7 +47,7 @@ def tilter(v: list[int], w_expression: list[int], k: int, n: int) -> list:
     v_adapt = perm_concat(inv(long_2(index_to_perm(v, n), k)), [i+1 for i in range(n)][::-1])
     v_exp = niave_expression(v_adapt, n)
     F = epsilon(v_exp, n - 1)
-    _, T_modules = simple_max_quotient(F,J,v)
+    R, T_modules = simple_max_quotient(F,J,v)
     while v in T_modules:
         T_modules.remove(v)
     t2 = perf_counter()

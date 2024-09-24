@@ -1,5 +1,5 @@
 import numpy as np
-from present import index_from_v, disconnect
+from present import index_from_v, disconnect, mat_to_num
 
 
 def top(presentation:np.ndarray) -> list:
@@ -140,10 +140,23 @@ def socle_quotients(hit: np.ndarray, socle: int) -> list:
     return out
 
 
+def mat_combine(m1:np.ndarray, m2:np.ndarray) -> np.ndarray:
+    B = np.zeros([m1.shape[0], m1.shape[1]])
+    for i in range(m1.shape[0]):
+        for j in range(m2.shape[1]):
+            if m1[i,j] != 0 and m2[i,j] != 0:
+                B[i,j] = 1
+    return B
+
+
+
+
+
 @profile_decorator
 def simple_max_quotient(profiles_1: list[np.ndarray], profiles_2: list[np.ndarray], v:list[int]) -> list[np.ndarray]:
     new = []
     for j in profiles_2:
+        start = [np.copy(j)]
         for t in profiles_1:
             q = socle_quotients(t, j.shape[0])
             run = True
@@ -152,16 +165,24 @@ def simple_max_quotient(profiles_1: list[np.ndarray], profiles_2: list[np.ndarra
                 if m.shape[0] <= j.shape[0] and m.shape[1] <= j.shape[1]:
                     a = top(m)
                     if all([j[i[0],i[1]] for i in a]):
+                        print(f'{m} submodule of {mat_to_num(np.copy(j))}')
                         l = []
                         for c in range(m.shape[0]):
                             for d in range(m.shape[1]):
                                 if m[c,d] == 1:
                                     l.append([c,d])
+                        N = np.copy(j)
                         for h in l:
-                            j[h[0],h[1]] = 0
+                            N[h[0],h[1]] = 0
+                        start.append(N)
                         run = False
                 del q[0]
-        new.append(j)
+        M = start[0]
+        del start[0]
+        while len(start) > 0:
+            M = mat_combine(M,start[0])
+            del start[0]
+        new.append(M)
     return new
 
 
@@ -182,7 +203,6 @@ def max_quotient(profiles_1:list[np.ndarray], profiles_2:list[np.ndarray], v:lis
                             j[:i[0] + 1,:i[1] + 1] = 0
         new.append(j)
     return new
-
 
 
 

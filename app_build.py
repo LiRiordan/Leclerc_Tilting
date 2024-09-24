@@ -293,4 +293,3 @@ compute.place(relx=0.6, rely = 0.3, relwidth=0.2, relheight=0.03)
 
 def kwivah_application():
     root.mainloop()
-
