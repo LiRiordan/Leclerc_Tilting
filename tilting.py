@@ -1,4 +1,4 @@
-from present import list_to_array, disconnect, mat_to_num
+from present import list_to_array
 from permutations import niave_expression, long_2, index_to_perm, perm_concat, inv
 from leclerc import epsilon
 from homological import simple_max_quotient

@@ -162,6 +162,17 @@ def weakly_seperated(q:list[int], w:list[int]) -> bool:
     return ws
 
 
+def opp(func):
+    def wrapper(necklace:list[list[int]]):
+        n = len(necklace)
+        complement = lambda x : [i+1 for i in range(n) if i+1 not in x]
+        op = map(complement, necklace)
+        n1 = [list(j) for j in list(op)]
+        P = func(n1)
+        b_mat = map(complement, P)
+        return [list(j) for j in list(b_mat)]
+    return wrapper
+
 
 
 

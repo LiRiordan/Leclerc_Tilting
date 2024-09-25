@@ -1,5 +1,5 @@
 import numpy as np
-from present import index_from_v, disconnect, mat_to_num
+from present import index_from_v, disconnect
 
 
 def top(presentation:np.ndarray) -> list:
@@ -165,7 +165,6 @@ def simple_max_quotient(profiles_1: list[np.ndarray], profiles_2: list[np.ndarra
                 if m.shape[0] <= j.shape[0] and m.shape[1] <= j.shape[1]:
                     a = top(m)
                     if all([j[i[0],i[1]] for i in a]):
-                        print(f'{m} submodule of {mat_to_num(np.copy(j))}')
                         l = []
                         for c in range(m.shape[0]):
                             for d in range(m.shape[1]):
