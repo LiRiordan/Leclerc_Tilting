@@ -3,6 +3,11 @@ from tkinter.ttk import Label, Style, Notebook, Entry
 from leclerc import necklace
 from permutations import *
 from leclerc import proj_inj
+import tkinter as tk
+from tkinter.ttk import Label, Style, Notebook, Entry
+from leclerc import necklace
+from permutations import *
+from leclerc import proj_inj
 from tilting import tilter
 
 necklace_string = "Given a pair (v,w) with v a maximal length representative of  coset in W^{K}\ W and w >= v" \
@@ -221,7 +226,7 @@ def display_necklace():
 
 
     txt = tk.Text(necklace_tab)
-    txt.place(relx = 0, rely = 0.6, relwidth= 0.9, relheight=0.25)
+    txt.place(relx = 0, rely = 0.4, relwidth= 0.9, relheight=0.6)
     txt.insert(tk.END, out)
 
 
@@ -295,7 +300,7 @@ def display_tilting():
         out += i
     out += f'( quotiented by M_{v})'
     txt = tk.Text(tilting_tab)
-    txt.place(relx = 0, rely = 0.6, relwidth= 0.9, relheight=0.25)
+    txt.place(relx = 0, rely = 0.4, relwidth= 0.9, relheight=0.6)
     txt.insert(tk.END, out)
 
 
