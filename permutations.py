@@ -174,6 +174,14 @@ def opp(func):
     return wrapper
 
 
+def length(w: list[int])->int:
+    counter = 0
+    for i in range(len(w)):
+        for j in range(len(w)):
+            if i < j and w[i] > w[j]:
+                counter +=1
+    return counter
+
 
 
 

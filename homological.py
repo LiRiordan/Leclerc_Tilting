@@ -34,15 +34,18 @@ def socle(presentation: np.ndarray) -> list:
         k += 1
     return socles
 
-def profile_decorator(func):
+def profile_decorator(func, index = True):
     def wrapper(profiles_1: list[np.ndarray], profiles_2: list[np.ndarray], v:list[int]):
-        counter = []
-        out = []
-        for j in func(profiles_1, profiles_2, v):
-            counter += disconnect(j)
-        for j in counter:
-            out += [index_from_v(v, j)]
-        return func(profiles_1, profiles_2, v), out
+        if not index:
+            return func(profiles_1, profiles_2, v)
+        else:
+            counter = []
+            out = []
+            for j in func(profiles_1, profiles_2, v):
+                counter += disconnect(j)
+            for j in counter:
+                out += [index_from_v(v, j)]
+            return func(profiles_1, profiles_2, v), out
     return wrapper
 
 
@@ -152,7 +155,7 @@ def mat_combine(m1:np.ndarray, m2:np.ndarray) -> np.ndarray:
 
 
 
-@profile_decorator
+
 def simple_max_quotient(profiles_1: list[np.ndarray], profiles_2: list[np.ndarray], v:list[int]) -> list[np.ndarray]:
     new = []
     for j in profiles_2:
@@ -202,6 +205,4 @@ def max_quotient(profiles_1:list[np.ndarray], profiles_2:list[np.ndarray], v:lis
                             j[:i[0] + 1,:i[1] + 1] = 0
         new.append(j)
     return new
-
-
 

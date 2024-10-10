@@ -120,7 +120,7 @@ V_description.place(relx=0.25, rely = 0.25, relwidth=0.15, relheight=0.03)
 v_entry = Entry(necklace_tab, width = 3, style='entry.TEntry', textvariable=v_var)
 v_entry.place(relx=0.4, rely = 0.25, relwidth=0.05, relheight=0.03)
 
-W_description = Label(necklace_tab, text='Enter a reduced expression for w', style='New3.TLabel', background='#999966')
+W_description = Label(necklace_tab, text='Enter reduced expression for w', style='New3.TLabel', background='#999966')
 W_description.place(relx=0.25, rely = 0.3, relwidth=0.15, relheight=0.03)
 
 w_entry = Entry(necklace_tab, width = 3, style='entry.TEntry', textvariable=w_var)
@@ -174,8 +174,8 @@ def display_necklace():
     v = string_to_list(v_var.get())
     if Galashin_Lam:
         hold = v.copy()
-        v = sorted(inv(flip(simple_to_perm(w_expression, n), n))[:k])
-        w_expression = niave_expression(flip(simple_to_perm(hold, n), n), n)
+        v = sorted(inv(flip(inv(simple_to_perm(w_expression, n)), n))[:k])
+        w_expression = niave_expression(flip(inv(simple_to_perm(hold, n)), n), n)
     v_expression = niave_expression(long_2(index_to_perm(v, n), k), n)
     pi = proj_inj(v_expression, w_expression, n,show = False)
     J = necklace(pi, v)
@@ -275,7 +275,7 @@ V1_description.place(relx=0.25, rely = 0.25, relwidth=0.15, relheight=0.03)
 v1_entry = Entry(tilting_tab, width = 3, style='entry.TEntry', textvariable=v_var)
 v1_entry.place(relx=0.4, rely = 0.25, relwidth=0.05, relheight=0.03)
 
-W1_description = Label(tilting_tab, text='Enter a reduced expression for w', style='New3.TLabel', background='#999966')
+W1_description = Label(tilting_tab, text='Enter reduced expression for w', style='New3.TLabel', background='#999966')
 W1_description.place(relx=0.25, rely = 0.3, relwidth=0.15, relheight=0.03)
 
 w1_entry = Entry(tilting_tab, width = 3, style='entry.TEntry', textvariable=w_var)

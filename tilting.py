@@ -1,8 +1,9 @@
-from present import list_to_array
-from permutations import niave_expression, long_2, index_to_perm, perm_concat, inv
+from present import list_to_array, mat_to_num
+from permutations import niave_expression, long_2, index_to_perm, perm_concat, inv, simple_to_perm, flip
 from leclerc import epsilon
-from homological import simple_max_quotient
+from homological import simple_max_quotient, profile_decorator
 from time import perf_counter
+import numpy as np
 
 def reflector(expression: list[int], n: int) -> list[int]:
     """We follow the algorithm in the Leclerc paper on cluster structures in
@@ -47,9 +48,35 @@ def tilter(v: list[int], w_expression: list[int], k: int, n: int) -> list:
     v_adapt = perm_concat(inv(long_2(index_to_perm(v, n), k)), [i+1 for i in range(n)][::-1])
     v_exp = niave_expression(v_adapt, n)
     F = epsilon(v_exp, n - 1)
-    R, T_modules = simple_max_quotient(F,J,v)
+    R, T_modules = profile_decorator(simple_max_quotient, index = True)(F,J,v)
     while v in T_modules:
         T_modules.remove(v)
     t2 = perf_counter()
     print(t2-t1)
+    return T_modules
+
+def GL_tilt(v_exp : list[int], w_expression : list[int], n: int) -> list:
+    J = tilt_alg_gls(w_expression, n - 1)
+    v = simple_to_perm(v_exp, n)
+    v_expression = niave_expression(perm_concat(inv(v), [i + 1 for i in range(n)][::-1]), n)
+    F = epsilon(v_expression, n - 1)
+    T_modules = simple_max_quotient(F, J, v=[])
+    for j in T_modules:
+        if np.any(j):
+            print(mat_to_num(np.copy(j)))
+    return T_modules
+
+def GL_to_Lec_tilt(a: list[int], b: list[int], k: int, n: int) -> list:
+    hold = a.copy()
+    v = flip(inv(simple_to_perm(b, n)), n)
+    w = flip(inv(simple_to_perm(hold, n)), n)
+    w_expression = niave_expression(w, n)
+    ind_v = sorted(inv(v)[:k])
+    J = tilt_alg_gls(w_expression, n - 1)
+    v_adapt = perm_concat(inv(v), [i + 1 for i in range(n)][::-1])
+    v_exp = niave_expression(v_adapt, n)
+    F = epsilon(v_exp, n - 1)
+    _, T_modules = profile_decorator(simple_max_quotient, index=True)(F, J, v=ind_v)
+    while ind_v in T_modules:
+        T_modules.remove(ind_v)
     return T_modules
