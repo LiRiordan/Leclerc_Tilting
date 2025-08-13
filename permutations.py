@@ -182,6 +182,53 @@ def length(w: list[int])->int:
                 counter +=1
     return counter
 
+def surj(N:list[list[int]], n:int, k:int ,i) -> list[list[int]]:
+    S = [list(b) for b in it.combinations([j + 1 for j in range(n)], k)]
+    output = []
+    c = [j + 1 for j in range(n)][i:] + [j + 1 for j in range(n)][:i]
+    for s in S:
+        RUN = []
+        for t in range(len(N)):
+            s = sorted(s, key=lambda x: c.index(x))
+            p = sorted(N[t], key=lambda x: c.index(x))
+            test = all([(cyclic_order(p[j], s[j], i + 1, n) or p[j] == s[j]) for j in range(k)])
+            RUN.append(test)
+        if any(RUN):
+            output.append(sorted(s))
+    return output
+
+
+
+
+
+def sur_list(N:list[list[int]], k: int, n: int) -> list[list[int]]:
+    A = surj(N, n, k, 0)
+    output = []
+    for a in A:
+        if all(a in surj(N,n,k,i+1) for i in range(n-1)):
+            output.append(a)
+    return output
+
+def comp(L:list[int], n:int)->list[int]:
+    T = [i+1 for i in range(n)]
+    co = [j for j in T if j not in L]
+    return co
+
+def opp_sur_list(N: list[list[int]], k: int, n:int) -> list[list[int]]:
+    Nop = [i for i in map(lambda x: comp(x,n), N)]
+    T = sur_list(Nop, n-k, n)
+    return [i for i in map(lambda x:comp(x,n), T)]
+
+def adapted_neck(v:list[int], w:list[int], k: int) -> list[list[int]]:
+    out = []
+    n = len(w)
+    fixed = [j+1 for (j) in range(n) if (v[j] == w[j]) and (v[j]-1) in range(k)]
+    for j in range(n):
+        out.append([l+1 for l in range(n) if cyclic_order(v[l], w[l], j+1, n)])
+    for i in range(n):
+        out[i] = sorted(out[i]+fixed)
+    return out
+
 
 
 
